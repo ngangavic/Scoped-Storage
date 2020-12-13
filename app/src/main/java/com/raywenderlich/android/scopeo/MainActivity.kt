@@ -1,37 +1,3 @@
-/*
- * Copyright (c) 2020 Razeware LLC
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- * 
- * Notwithstanding the foregoing, you may not use, copy, modify, merge, publish,
- * distribute, sublicense, create a derivative work, and/or sell copies of the
- * Software in any work that is designed, intended, or marketed for pedagogical or
- * instructional purposes related to programming, coding, application development,
- * or information technology.  Permission for such use, copying, modification,
- * merger, publication, distribution, sublicensing, creation of derivative works,
- * or sale is expressly withheld.
- * 
- * This project and source code may use libraries or frameworks that are
- * released under various Open-Source licenses. Use of those libraries and
- * frameworks are governed by their own individual licenses.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- */
-
 package com.raywenderlich.android.scopeo
 
 import android.Manifest
@@ -87,7 +53,17 @@ class MainActivity : AppCompatActivity() {
     })
 
     viewModel.permissionNeededForDelete.observe(this, Observer { intentSender ->
-      // TODO: Use the IntentSender to prompt the user for deleting the image
+      intentSender?.let {
+        startIntentSenderForResult(
+                intentSender,
+                DELETE_PERMISSION_REQUEST,
+                null,
+                0,
+                0,
+                0,
+                null
+        )
+      }
     })
 
     openAlbumButton.setOnClickListener { openMediaStore() }
@@ -105,6 +81,7 @@ class MainActivity : AppCompatActivity() {
       permissions: Array<String>,
       grantResults: IntArray
   ) {
+    super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     when (requestCode) {
       READ_EXTERNAL_STORAGE_REQUEST -> {
         // If request is cancelled, the result arrays are empty.
@@ -173,7 +150,20 @@ class MainActivity : AppCompatActivity() {
 
 
   private fun requestPermission() {
-    // TODO: Request the required permissions
+    if (!haveStoragePermission()) {
+      val permissions = arrayOf(
+              Manifest.permission.READ_EXTERNAL_STORAGE,
+              Manifest.permission.WRITE_EXTERNAL_STORAGE
+      )
+      ActivityCompat.requestPermissions(
+              //1
+              this,
+              //2
+              permissions,
+              //3
+              READ_EXTERNAL_STORAGE_REQUEST
+      )
+    }
   }
 
   private fun deleteImage(image: Image) {
